@@ -1,10 +1,24 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>{{ title }}</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    {% block body %}{% endblock %}
-  </body>
-</html>
+{% extends "base/base.twig" %}
+{% block body %}
+    <header>
+        {% block header %}
+            {% include 'includes/top-navigation.twig' %}
+        {% endblock %}
+    </header>
+    <div class="main-container" id="main-container">
+        <div class="main-container-inner">
+           {% block sidebar %}
+           {% endblock %}
+            <div class="main-content">
+                <div class="page-content">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+            {% block footer %}
+                {% include 'includes/footer.twig' %}
+            {% endblock %}
+        </div>
+    </div>
+    <div id="pop_space"></div>
+{% endblock %}
+
