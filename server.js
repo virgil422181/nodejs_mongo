@@ -1,4 +1,4 @@
-var app = require('./app.js');
+var app = require('./app/app');
 
 app.set('port', process.env.PORT || 3300);
 
