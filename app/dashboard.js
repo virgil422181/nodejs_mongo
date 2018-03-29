@@ -1,4 +1,8 @@
-var mongodb = require('mongodb');
+var mongodb = require(mongo);
 
-var dashboard = {};
+var dashboard = {
+    data: function () {
+
+    }
+};
 exports.module = dashboard;

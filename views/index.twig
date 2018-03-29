@@ -1,7 +1,6 @@
 {% extends 'base/layout.twig' %}
 
 {% block content %}
-  <h1>{{title}}</h1>
-  <p>Welcome to {{title}}</p>
+{{ data|json_encode }}
 {% endblock %}
 

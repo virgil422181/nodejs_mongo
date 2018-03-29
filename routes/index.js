@@ -1,12 +1,11 @@
 var express = require('express');
 var router = express.Router();
-var dashboard = require('../app/dashboard');
+var mongo = require('../app/mongodb');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
-
-  res.render('index', { title: 'Express' });
+  res.render('index', { data: mongo.data });
 });
 
 module.exports = router;
