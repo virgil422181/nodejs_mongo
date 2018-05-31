@@ -1,6 +1,7 @@
 {% extends 'base/layout.twig' %}
 
 {% block content %}
-{{ data|json_encode }}
+   {{ dump(data) }}
+{#{{ data|json_encode }}#}
 {% endblock %}
 

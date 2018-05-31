@@ -6,10 +6,9 @@ exports.getDbContent = (request, response) => {
             if (err) throw err;
             db.db("supplier-order-node").collection("request_body").find({}).toArray(function (err, data) {
                 if (err) throw err;
-                return data; // ??
+                db.close();
+                response.end(data);
             });
-
-            db.close();
         }
     );
 };
