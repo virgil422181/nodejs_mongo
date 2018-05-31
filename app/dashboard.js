@@ -1,8 +1,8 @@
-var mongodb = require(mongo);
+let mongo = require('mongodb');
 
-var dashboard = {
-    data: function () {
-
+let dashboard = {
+    data: function (req, res) {
+        return mongo.getDbContent(req, res);
     }
 };
 exports.module = dashboard;
