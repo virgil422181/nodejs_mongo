@@ -1,13 +1,22 @@
 {% extends 'base/layout.twig' %}
 
 {% block content %}
-    <ul>
-      {% for order in data %}
-             {% for key, value in order %}
-                <li>{{ key }}: {{ value }}</li>
-             {% endfor %}
-      {% endfor %}
-    </ul>
-{#{{ data|json_encode }}#}
-{% endblock %}
 
+    {% block filter %}
+        {% include 'filter.twig' %}
+    {% endblock %}
+
+    {% block middleContent %}{% endblock %}
+
+    {% block grid %}
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                {% for order in data %}
+                    {% for key, value in order %}
+                        <li>{{ key }}: {{ value }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}

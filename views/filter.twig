@@ -1,0 +1,41 @@
+<div class="panel panel-primary">
+    <form >
+        <div class="panel-heading">
+            <h4 class="panel-title">Search errors</h4>
+        </div>
+        <div class="panel-body">
+            <div class="form-group col-lg-3">
+                <label for="exampleInputEmail1">Document id number</label>
+                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter document identification number">
+            </div>
+        </div>
+        <div class="panel-footer">
+                        <span class="pull-left">
+                            <div class="form-sep">
+                                <span class="required"></span>Mandatory fields
+                            </div>
+                        </span>
+            <span class="pull-right panel-controls">
+                            <button type="button" id="filterSubmit" class="btn btn-primary search-button"><i class="fa fa-search"></i>
+                                Search
+                            </button><a href="javascript:window.location.replace(document.referrer)" class="btn btn-default back-button"><i class="fa fa-arrow-left"></i>
+                                Back
+                        </a>
+            </span>
+        </div>
+    </form>
+</div>
+<script>
+    var filter_form = $("#{% if filterId is defined %}{{ filterId }}{% else %}filters{% endif %}");
+    $(document).ready(function () {
+        $(document).keypress(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if(keycode == '13'){
+                filter_form.submit(function(e){
+                    e.preventDefault();
+                });
+                $( "#filterSubmit" ).trigger( "click" );
+            }
+        });
+    });
+</script>

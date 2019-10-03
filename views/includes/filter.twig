@@ -1,0 +1,61 @@
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="widget-box widget-color-blue">
+                <div class="widget-header">
+                    <h5 class="widget-title">search Error</h5>
+                    <div class="widget-toolbar">
+                        <a href="#" data-action="collapse">
+                            <i class="ace-icon fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="widget-body">
+                    <div class="widget-main pad-top-20">
+                        <form id="id" name="name" action="" method="post">
+                            <div class="row">
+                               test
+                            </div>
+                            <hr/>
+                            <div class="row">
+                                {% block listFooter %}
+                                    {#<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">#}
+                                    {#<span class="required"></span>#}
+                                    {#<small class="grey">#}
+                                    {#<i>Aplicati cel putin un filtru de cautare: Categoria, Brandul, Denumire sau Cod (minim 3 caractere).#}
+                                    {#</i>#}
+                                    {#</small>#}
+                                    {#<div class="space-6 visible-xs-block"></div>#}
+                                    {#</div>#}
+                                {% endblock %}
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 form-custom-controls">
+                                    <div class="pull-right">
+                                        <button class="btn btn-xs btn-info" id="filterSubmit" type="button">
+                                            <i class="ace-icon fa fa-search"></i>{% trans %}label.filterSubmit{% endtrans %}
+                                        </button>
+                                        <button class="btn btn-xs btn-link reset-form-action" id="filterReset" type="reset">
+                                            <i class="ace-icon fa fa-undo"></i>{% trans %}label.filterReset{% endtrans %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="space"></div>
+    <script>
+        var filter_form = $("#{% if filterId is defined %}{{ filterId }}{% else %}filters{% endif %}");
+        $(document).ready(function () {
+            $(document).keypress(function(event){
+                var keycode = (event.keyCode ? event.keyCode : event.which);
+                if(keycode == '13'){
+                    filter_form.submit(function(e){
+                        e.preventDefault();
+                    });
+                    $( "#filterSubmit" ).trigger( "click" );
+                }
+            });
+        });
+    </script>
