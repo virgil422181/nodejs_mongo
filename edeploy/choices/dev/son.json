@@ -1,0 +1,26 @@
+{
+	"include": {
+		"xref": {
+			"common": {
+				"type": "url",
+				"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/choices/common.json"
+			}
+		},
+		"main": ["common"]
+	},
+	"remove": {
+		
+	},
+	"add": {
+		"son:host": {
+			"prompt": "Specify the hostname (default \"<default-value>\")",
+			"type": "string",
+			"default": "son.emag.network"
+		},
+		"son:http": {
+			"prompt": "Specify the vhost DNS (default \"<default-value>\")",
+			"type": "string",
+			"default": "http://son.emag.network"
+		}
+	}
+}

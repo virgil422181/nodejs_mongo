@@ -1,0 +1,23 @@
+{
+	"include": {
+		"xref": {
+			"owned": {
+				"type": "url",
+				"src": "[[repo:son-interface:fetch-url]]/[[repo:son-interface:version]]/edeploy/config-values/test/son-interface.owned.json"
+			},
+			"son": {
+				"type": "url",
+				"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/config-values/test/son.owned.json"
+			}
+		},
+
+		"main": [
+			"owned",
+			"son"
+		]
+	},
+	"add": {
+		"common_data": {
+		}
+	}
+}

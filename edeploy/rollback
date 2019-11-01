@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./run rollback none serial $1

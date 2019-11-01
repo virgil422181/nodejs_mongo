@@ -1,0 +1,40 @@
+{
+	"include": {
+		"xref": {
+			"compile": {
+				"type": "inline",
+				"data": {
+					"include": {
+						"xref": {
+							"scripts": {
+								"type": "url",
+								"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/scripts/[[env]]/son-interface.json"
+							},
+							"config-values": {
+								"type": "url",
+								"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/config-values/[[env]]/son-interface.json"
+							}
+						},
+						"main": ["scripts",
+							"config-values"]
+					}
+				},
+				"resolve": [{
+					"type": "registered",
+					"values-xref": {
+						"type": "url",
+						"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/answers/[[env]].json"
+					}
+				},
+					{
+						"type": "on-demand",
+						"values-xref": {
+							"type": "url",
+							"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/choices/[[env]]/son.json"
+						}
+					}]
+			}
+		},
+		"main": ["compile"]
+	}
+}

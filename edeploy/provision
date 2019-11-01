@@ -1,0 +1,357 @@
+#!/usr/bin/env bash
+
+# machine template: vanilla-centos7
+
+if [ -d /var/www/default ]; then
+  echo "Machine already provisioned";
+  exit 0;
+fi;
+
+PHPVER="7.0.14"
+REMOTEIP=$1
+
+echo "Writing eMAG NOC YUM repositories"
+
+cat <<EOT > /etc/yum.repos.d/emagnoc.repo
+[emagnoc]
+name=eMAG NOC main repository - \$basearch
+baseurl=http://repo.emag.ro/rhel/\$releasever/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+
+[emagnoc-extras]
+name=eMAG NOC extras repository - \$basearch
+baseurl=http://repo.emag.ro/rhel/\$releasever/extras/\$basearch/
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+gpgcheck=1
+
+[emagnoc-php70-common]
+name=eMAG NOC php70 common repository
+baseurl=http://repo.emag.ro/rhel/\$releasever/php70/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+priority=55
+
+[emagnoc-php70]
+name=eMAG NOC php70 repository
+baseurl=http://repo.emag.ro/rhel/\$releasever/php70/$PHPVER/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+priority=55
+
+[emagnoc-nginx]
+name=eMAG NOC nginx repository
+baseurl=http://repo.emag.ro/rhel/\$releasever/nginx/\$basearch/
+enabled=1
+gpgcheck=1
+priority=55
+
+[emagnoc-percona]
+name=eMAG NOC Percona repository
+baseurl=http://repo.emag.ro/rhel/\$releasever/percona/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+priority=55
+
+[emagnoc-remisafe]
+name=eMAG remi-safe repository
+baseurl=http://repo.emag.ro/rhel/\$releasever/remisafe/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+priority=55
+
+[emagnoc-remiunsafe]
+name=eMAG remi-unsafe repository
+baseurl=http://repo.emag.ro/rhel/\$releasever/remiunsafe/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+priority=55
+
+EOT
+
+echo "Writing eMAG NOC YUM repositories GPG Key"
+
+cat <<EOT > /etc/pki/rpm-gpg/RPM-GPG-KEY-emagnoc
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v2.0.14 (GNU/Linux)
+
+mQENBFN6KF4BCADtwtsZGakFwDctM2oemCVUmImmadllqwgn8mYYn8Yj9o64bwip
+whhF8GydjhF0wESD/YgZKj0CpAoFZXHzIxmoInBBob5fx7Ph0uFu1lYnfe2KiGvR
+uHd2XLcVTSaeYms6OTem+YueDv0j/MSl5N6kGuR1mE0ycIVx+JdP43Cha+WI9xxq
+MlnjTXO66rwI95aEuxR5tRqd8EzIo2fWrA08qUW5bO1TNRUD3SQEkfwR439eFHkY
+l9TH4TsmY5YV3eMyvuxcvhoCbomD09QGnF18HeCfliT3SoGfBI7hkOWMj6Qdw5xn
+eehv6o9UrMlOasnQZMMZOg8BlGldl3FFCmTRABEBAAG0FmVNQUcgTk9DIDxub2NA
+ZW1hZy5ybz6JATgEEwECACIFAlN6KF4CGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4B
+AheAAAoJEFLtD1lxWTr3nVEH/0Mw4ar82RnzgYRDaz+O5I7UtUZjDl5v90ZsP5iL
+mKYszprrW6yOZPaX57csmdgpI7il1YdHOk9u0LMO4dcp6pqJ1z/j5F4r9y5UoYR8
+isZFfkf/fRXkwCCjqeLGX10VIxwbKpnMtfczAYqKztaec6cse+oTfZolfdZh2cZX
+CzPZF4zlYKi8UUGu1C79NtxiVWEmRIeEaosUJHTR/R5T3OZxJrCF3TXgRn984qdn
+yLQz+aISMRk1eqy92soCu7x3Bvr+5xLKKE32fp1g87YOwIIP6AsrpLgUDvJYSCZl
+m5QWYpwQ728eAp/wh+wUlE3Vzsx43pZHYO4yuwT+CjnzbKG5AQ0EU3ooXgEIAMuo
+lOoexxTGc6zZbSBXh/I9gzPIlF+XQicOLeVYWDel9UPMUnolkXc8r7NUWE5hnoR0
+97pqhzVxVkhBXou08Exvuv1n4R0BIgEhT6S/OciL0bairYI7ItXtJSwBDfCwAGbd
+HNjfUZzzQE1Y0ZfwN0f+2ZbxHwZEiLNYB++jTvHrSVglE0WETXSou2MVDwf08PnQ
+Pc7HQpgTGis/hbLsabvBQfxKwU00iomtLsnH5/kcQ8Ej8eoXCh6dvvXXk+5H1d2g
+clI92+SP0Gs6+YUu1r5cg9/PITKc+Bo3a5vrpO00ibd6Fr9HYUQ6yKc+4RBRgZEN
+MRcxYpNrUnbIpzrZfBEAEQEAAYkBHwQYAQIACQUCU3ooXgIbDAAKCRBS7Q9ZcVk6
+95UQCADjt7LpInJ9dNlU7gz/MZwEn3GFTtbA8ZJuIxqFFOjX970jjEBI54rtYRZ0
+2HhMrwhYluDnucKs+BlD1QGAFgyP6z9EYoLw6O4nvU9uEUUwl6+EYf/ywkfk/MaN
+cUnI9uOyBytWN5N2BWZo4Q/DaqYeBGJK9sLqFREEJhP/HDaJvabYijQL1VZ0BJhv
+bwFeE6f6JBCv1z1YzEbEfw3rFL4Iy+fL1iw9kLf/1lY/6VtrVSUuUYQzoOYQQaBr
+oLtTkchSOJvbhe9ywZEKYKvM2EsOONaRgsu3G6X2c05+qWcSTVu4qqr0bwz1AauB
+os9soy0Jf+SZesp+NMoNBZ3sEYSE
+=j4Kk
+-----END PGP PUBLIC KEY BLOCK-----
+
+EOT
+
+echo "Updating YUM Repository cache"
+yum clean all
+yum makecache fast
+yum repolist all
+
+echo "Installing Memcached 1.4"
+yum --disablerepo "*" --enablerepo "emagnoc-remiunsafe" install -y \
+  memcached-1.4.*
+
+# config file is in /etc/sysconfig/memcached. Default: PORT="11211"
+  
+service memcached start
+
+chkconfig memcached on
+
+echo "Installing NGINX (with LUA) 1.11"
+yum --disablerepo "*" --enablerepo "emagnoc-nginx" install -y \
+  nginx-lua-1.11.*
+
+mkdir -p /etc/nginx/sites-available
+chown www-data:www-data /etc/nginx/sites-available
+chmod 0775 /etc/nginx/sites-available
+
+mkdir -p /etc/nginx/sites-enabled
+chown www-data:www-data /etc/nginx/sites-enabled
+chmod 0775 /etc/nginx/sites-enabled
+
+mkdir -p /var/www/default
+chmod 0755 /var/www/default
+
+cat <<EOT > /var/www/default/index.php
+<?php 
+phpinfo();
+
+EOT
+
+cat <<EOT > /etc/nginx/sites-available/00-default.conf
+server {
+    listen 80 default_server;
+
+    server_name _ default_server;
+
+    root /var/www/default;
+
+    access_log /var/log/nginx/default-blank-access.log;
+    error_log  /var/log/nginx/default-blank-error.log;
+
+    index index.php index.html index.htm;
+
+    location /nginx_status {
+        stub_status on;
+    }
+
+    location / {
+       if (\$request_method = OPTIONS ) {
+           add_header Access-Control-Allow-Methods "GET, OPTIONS";
+           add_header Access-Control-Allow-Headers "Authorization";
+           add_header Access-Control-Allow-Credentials "true";
+           add_header Content-Length 0;
+           add_header Content-Type text/plain;
+           return 200;
+       }
+       try_files \$uri \$uri/ =404;
+    }
+
+    location ~ \\.php\$ {
+        try_files \$uri =404;
+        fastcgi_split_path_info ^(.+\\.php)(/.+)\$;
+        include conf.d/fastcgi/php-local.conf;
+        fastcgi_param HTTPS off;
+    }
+}
+
+EOT
+
+ln -snf /etc/nginx/sites-available/00-default.conf /etc/nginx/sites-enabled/00-default.conf
+
+cat <<EOT > /etc/nginx/nginx.conf
+user www-data;
+worker_processes 4;
+worker_priority 0;
+
+pid /var/run/nginx.pid;
+
+events {
+        worker_connections 768;
+        use epoll;
+}
+
+http {
+        sendfile on;
+        tcp_nopush off;
+        tcp_nodelay off;
+        keepalive_timeout 0;
+        types_hash_max_size 2048;
+        server_tokens off;
+        server_names_hash_bucket_size 128;
+
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                '\$status \$body_bytes_sent "\$http_referer" '
+                '"\$http_user_agent" "\$http_x_forwarded_for" \$request_time "\$sent_http_x_page_type"';
+
+        access_log /var/log/nginx/access.log main;
+        error_log /var/log/nginx/error.log;
+
+        gzip on;
+        gzip_disable "msie6";
+        gzip_vary on;
+        gzip_proxied any;
+        gzip_comp_level 5;
+        gzip_min_length 1024;
+        gzip_types application/javascript application/json application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xml application/xml+rss font/eot font/opentype font/otf image/svg+xml image/vnd.microsoft.icon image/x-icon text/css text/html text/javascript text/plain text/xml;
+
+        ssl_ciphers HIGH:!aNULL:!MD5:!kEDH;
+        ssl_prefer_server_ciphers on;
+
+        underscores_in_headers on;
+
+        client_max_body_size 1M;
+        large_client_header_buffers 4 8k;
+
+        map_hash_bucket_size 256;
+
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+}
+
+EOT
+
+mkdir -p /etc/nginx/conf.d/fastcgi
+cat <<EOT > /etc/nginx/conf.d/fastcgi/php-local.conf
+include fastcgi_params;
+fastcgi_index index.php;
+fastcgi_hide_header "X-Powered-By";
+fastcgi_param SCRIPT_NAME \$fastcgi_script_name;
+fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+fastcgi_param DOCUMENT_ROOT \$document_root;
+fastcgi_pass 127.0.0.1:9000;
+fastcgi_buffers 16 16k;
+fastcgi_buffer_size 32k;
+
+EOT
+
+echo "Installing PHP-FPM 7.0"
+yum --disablerepo "*" --enablerepo "emagnoc-php70,emagnoc-php70-common,emagnoc-remiunsafe,centos,base,epel" install -y \
+  php-common-${PHPVER}* \
+  php-fpm-${PHPVER}* \
+  php-cli-${PHPVER}* \
+  php-json-${PHPVER}* \
+  php-soap-${PHPVER}* \
+  php-ldap-${PHPVER}* \
+  php-pdo-${PHPVER}* \
+  php-xml-${PHPVER}* \
+  php-bcmath-${PHPVER}* \
+  php-mbstring-${PHPVER}* \
+  php-mcrypt-${PHPVER}* \
+  php-mysqlnd-${PHPVER}* \
+  php-opcache-${PHPVER}* \
+  php-pecl-apcu-5.1.* \
+  php-pecl-apcu-bc-1.0.* \
+  php-pecl-memcache-3.0.* \
+  php-pecl-memcached-3.0.* \
+  php-pecl-mongodb-1.2.* \
+  php-pecl-redis-3.1.* \
+  php-pecl-xdebug-2.5.*
+
+# configure xdebug
+cat <<EOT > /etc/php-fpm.ini
+zend_extension=xdebug.so
+
+xdebug.idekey=PHPSTORM
+xdebug.remote_enable=1
+xdebug.remote_autostart=1
+xdebug.remote_connect_back=0
+xdebug.remote_host=$REMOTEIP
+xdebug.remote_port=9000
+
+EOT
+
+# configure openssl
+(cat /etc/openldap/ldap.conf | grep 'TLS_REQCERT' &>/dev/null) || echo "TLS_REQCERT never" >> /etc/openldap/ldap.conf
+
+# configure php-fpm
+sed -i -- 's/user \= apache/user \= www\-data/g' /etc/php-fpm.d/www.conf
+sed -i -- 's/group \= apache/group \= www\-data/g' /etc/php-fpm.d/www.conf
+sed -i -- 's/php_value\[session\.save_handler\] \= files/php_value\[session\.save_handler\] \= memcached/g' /etc/php-fpm.d/www.conf
+sed -i -- 's/php_value\[session\.save_path\]    \= \/var\/lib\/php\/session/php_value\[session\.save_path\]    \= \"127\.0\.0\.1\:11211\"/g' /etc/php-fpm.d/www.conf
+
+cat <<EOT > /etc/php-fpm.ini
+[PHP]
+session.save_handler = memcached
+session.save_path = 127.0.0.1:11211
+
+[Date]
+date.timezone = Europe/Bucharest
+
+EOT
+
+service php-fpm start
+
+chkconfig php-fpm on
+
+service nginx start
+
+chkconfig nginx on
+
+echo "Installing RabbitMQ 3.6"
+yum --disablerepo "*" --enablerepo "emagnoc-extras,epel,base" install -y \
+  rabbitmq-server-3.6.*
+
+service rabbitmq-server start
+rabbitmqctl authenticate_user emag emagbunny || \
+  (rabbitmqctl delete_user guest; \
+  rabbitmqctl add_user emag emagbunny && \
+  rabbitmqctl set_user_tags emag administrator && \
+  rabbitmqctl set_permissions -p / emag ".*" ".*" ".*")
+
+rabbitmq-plugins enable rabbitmq_management
+
+chkconfig rabbitmq-server on
+
+echo "Installing Supervisor 3.1"
+yum install -y \
+  supervisor-3.1.*
+
+mkdir -p /etc/supervisor/conf.d
+chmod 0755 /etc/supervisor
+chmod 0775 /etc/supervisor/conf.d
+
+# configure supervisor
+sed -i -- 's/\;\[inet_http_server\]/\[inet_http_server\]/g' /etc/supervisord.conf
+sed -i -- 's/\;port\=127\.0\.0\.1\:9001/port\=\:8989/g' /etc/supervisord.conf
+sed -i -- 's/\;username\=user/username\=admin/g' /etc/supervisord.conf
+sed -i -- 's/\;username\=chris/username\=admin/g' /etc/supervisord.conf
+sed -i -- 's/\;password\=123/password\=parolasupervisor1213/g' /etc/supervisord.conf
+(cat /etc/supervisord.conf | grep 'conf\.d\/\*\.conf' &>/dev/null) || echo "files = [ /etc/supervisor/conf.d/*.conf , /etc/supervisor/conf.d/*/*.conf ]" >> /etc/supervisord.conf
+
+service supervisord start
+
+chkconfig supervisord on

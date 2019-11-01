@@ -1,0 +1,31 @@
+#!/usr/bin/env php
+<?php
+
+$dir = dirname(__FILE__);
+
+function validateJsons($dir) {
+    $files = scandir($dir);
+    $valid = true;
+    foreach($files as $key => $value) {
+        $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
+        if (!is_dir($path)) {
+            if (substr($path, -5) == '.json') {
+              $data = file_get_contents($path);
+              $json = json_decode($data, true);
+              if (!isset($json)) {
+                  echo "Invalid syntax in JSON: " . $path . "\n";
+                  $valud = false;
+              }
+            }
+        } else if ($value != "." && $value != "..") {
+            if (!validateJsons($path)) {
+              $valid = false;
+            }
+        }
+    }
+    return $valid;
+}
+
+if (validateJsons($dir)) {
+   echo "All JSON files have valid syntax.\n";
+}

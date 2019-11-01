@@ -1,0 +1,11 @@
+{
+	"include": {
+		"xref": {
+			"distribution": {
+				"type": "url",
+				"src": "[[repo:son-interface:fetch-url]]/[[repo:son-interface:version]]/edeploy/distribution.json"
+			}
+		},
+		"main": ["distribution"]
+	}
+}

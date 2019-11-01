@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./run sync none serial $1

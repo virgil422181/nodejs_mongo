@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "install": "if [ ! -f .env ]; then cp .env.example .env; fi;",
-    "build": "npm run compile && npm run minify"
+    "build": "npm run compile && npm run minify",
+    "start": ""
   },
   "dependencies": {
     "body-parser": "^1.18.3",

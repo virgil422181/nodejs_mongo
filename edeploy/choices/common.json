@@ -1,0 +1,26 @@
+{
+	"env": {
+		"prompt": "Choose the environment",
+		"type": "single-choice",
+		"choices": {
+			"dev": "Development",
+			"test": "Testing",
+			"prod": "Production"
+		}
+	},
+	"repo:son:branch": {
+		"prompt": "Specify the application branch (default \"<default-value>\")",
+		"type": "string",
+		"default": "master"
+	},
+	"repo:son:commit-hash": {
+		"prompt": "Specify the commit hash for the application repo (default is the last one)",
+		"type": "string",
+		"default": ""
+	},
+	"repo:son-prod:commit-hash": {
+		"prompt": "Specify the commit hash for the production configs repo (default is the last one)",
+		"type": "string",
+		"default": ""
+	}
+}

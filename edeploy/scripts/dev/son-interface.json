@@ -1,0 +1,53 @@
+{
+	"include": {
+		"xref": {
+			"common": {
+				"type": "url",
+				"src": "[[repo:son-interface:fetch-url]]/[[repo:son-interface:version]]/edeploy/scripts/common.json"
+			}
+		},
+		"main": ["common"]
+	},
+	"remove": {
+		
+	},
+	"add": {
+		"cluster": {
+			"son": {
+				"feat-name-override": "/var/www",
+				"master": {
+					"son": {
+						"package-manager": {
+							"data": {
+								"install-type": "soft",
+								"arguments": [],
+								"env": {
+									"SYMFONY_ENV": "dev"
+								}
+							},
+							"name": "composer.phar"
+						},
+						"post-config": {
+							"console": {
+								"clear-cache": "rm -rf <release-next>/app/cache",
+								"remove-pre-commit-hook": "rm -rf <release-next>/.git/hooks/pre-commit"
+							}
+						},
+						"pre-switch": {
+							"console": {
+								"fix-perms": "sudo chmod g+w <root>",
+								"backup-idea": "if [[ -d $B/release/.idea ]]; then sudo rm -rf $B/release/.idea-backup; sudo mv <release>/.idea $B/release/.idea-backup; true; else echo \".idea - nothing to backup\"; fi;"
+							}
+						},
+						"post-switch": {
+							"console": {
+								"move-into-release": "B=\" /var/www\"; rm -rf $B/release; mv <release-next> $B/release; ln -snf $B/release/web $B/htdocs; ln -snf $B/release/app $B/app; rm -f $B/prev-htdocs",
+								"restore-idea": "if [[ -d $B/release/.idea-backup ]]; then sudo mv $B/release/.idea-backup $B/release/.idea; true; else echo \".idea - nothing to restore\"; fi;"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

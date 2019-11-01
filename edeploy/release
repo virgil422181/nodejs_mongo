@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./run release none serial $1

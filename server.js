@@ -1,5 +1,5 @@
 var app = require('./app/app');
-var config = require('./app/config')
+var config = require('./app/config');
 
 app.set('port', process.env.PORT || config.PORT || 3000);
 

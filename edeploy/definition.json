@@ -1,0 +1,128 @@
+{
+	"$schema": "http://confluence.emag.local:8090/display/RND/application+definition+file+structure#",
+	"son": {
+		"name": "Supplier Order Node Interface",
+		"description": {
+			"en": "Monitoring Supplier Order Node Errors.",
+			"ro": "Monitoring Supplier Order Node Errors."
+		},
+		"maintainers": [
+			{
+				"name": "SCM Dev Team",
+				"email": "tech.division.scm@emag.ro"
+			}
+		],
+		"public-links": {
+			"vhosts": {
+				"machine": {
+					"dev": "http://<hostname>",
+					"test": "http://<hostname>"
+				},
+				"default": {
+					"dev": "http://<stack-code>.<app-dist-code>.<hostname>",
+					"test": "http://s<stack-code>.<app-dist-code>.<hostname>"
+				}
+			},
+			"routes": [{
+				"route": "<default>/",
+				"languages": {
+					"ro": {
+						"caption": "Pagina principală"
+					},
+					"en": {
+						"caption": "Home page"
+					}
+				}
+			},
+			{
+				"route": "<machine>/nginx_status",
+				"languages": {
+					"en": {
+						"caption": "NGINX Status"
+					}
+				}
+			},
+			{
+				"route": "<machine>:8989",
+				"languages": {
+					"en": {
+						"caption": "Supervisor"
+					}
+				}
+			}]
+		},
+		"type": "application",
+		"deployable": true,
+		"git-repositories": {
+			"application": {
+				"son-interface": "ssh://git@stash.emag.network/scm/supplier-order-node-interface.git"
+			},
+			"config-values": {
+				"son-interface-prod": "ssh://git@stash.emag.network/scm/supplier-order-node-interface-conf.git"
+			}
+		},
+		"info-services": {
+			"uptime": false,
+			"loadtime": false,
+			"edeploy-prod": true,
+			"edeploy-stack": true,
+			"edeploy-dev": true
+		},
+		"organization-scopes": {
+			"full-scope": [{
+				"country": ["ro", "bg", "hu", "pl"],
+				"company": ["dante", "agito"],
+				"platform": ["emag.ro", "m.emag.ro", "emag.bg", "emag.hu", "m.agito.pl", "agito.pl"]
+			}]
+		},
+		"business-flags": {
+			"full-scope": {
+			}
+		},
+		"distributions": {
+			"son-interface": {
+				"name": "Supplier Order Node Interface",
+				"organization-scope": "full-scope",
+				"config-templates": {
+					"son-interface": {
+						"edeploy/config-templates/son-interface/.env.edeploy": {
+							"target": ".env"
+						}
+					}
+				},
+				"deployment": {
+					"environment": {
+						"dev": {
+							"configurable": true,
+							"machine": {
+								"template": "son-interface-dev",
+								"slots": 1,
+								"allocation-service": "openstack",
+								"allocation-tokens": {
+									"http:static": null,
+									"supervisor:port": "8989",
+									"supervisor:username": "admin",
+									"supervisor:password": "parolasupervisor1213"
+								}
+							}
+            			},
+						"test": {
+							"configurable": true,
+							"machine": {
+								"template": "son-dev",
+								"slots": 1,
+								"allocation-service": "openstack",
+								"allocation-tokens": {
+									"http:static": null,
+									"supervisor:port": "8989",
+									"supervisor:username": "admin",
+									"supervisor:password": "parolasupervisor1213"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

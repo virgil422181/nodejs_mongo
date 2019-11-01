@@ -1,0 +1,115 @@
+{
+	"cluster": {
+		"son": {
+			"deploy-machines": "[[son-interface:host]]",
+			"path": "",
+			"feat-name-override": "[[root-path]][[deploy-folder]]/son-interface",
+			"node-unsync-members": "/logs/",
+			"pre-cluster": {
+				"console": {
+					"provision": "#git archive --format=tar --remote=[[repo:son:address]] [[repo:son:branch]] edeploy/provision | tar -xO | sudo bash"
+				}
+			},
+			"master": {
+				"son": {
+					"branch": "[[repo:son-interface:branch]]",
+					"commit-hash": "[[repo:son-interface:commit-hash]]",
+					"repo-ssh": "[[repo:son-interface:address]]",
+					"web-route": "web",
+					"config": {
+						"nginx": {
+							"members": {
+								"{{app-code}}-{{dist-code}}.emag.network": {
+									"folder": "/etc/nginx/sites-enabled/",
+									"parameters": {
+										"vhost_dns": "@json:/common_data/son-interface.vhost_dns",
+										"document_root": "<root>/htdocs",
+										"access_log": "<root>/logs/access.log",
+										"error_log": "<root>/logs/error.log"
+									},
+									"custom": "<release-next>/edeploy/config-templates/son-interface/",
+									"template": "vhosts.conf.edeploy"
+								}
+							},
+							"options": {
+								"language": "php",
+								"secure": "False"
+							}
+						},
+						"app": {
+							"members": {
+								"parameters.yml": {
+									"folder": "<release-next>/app/config/",
+									"strict": false,
+									"template": "../../edeploy/config-templates/son-interface/parameters.yml.edeploy"
+								}
+							}
+						},
+						"supervisor": {
+							"folders": {
+								"<release-next>/edeploy/config-supervisor/all": {
+									"template": false,
+									"target": "<root>/supervisor-generated",
+									"search-replace": {
+										"[program:": "[program:<feat-name>.<cluster-name>.",
+										"/usr/bin/node /var/www/son-interface.emag.network": "node <root>"
+									},
+									"program-override": {
+										"autostart": "false",
+										"numprocs": "1",
+										"stdout_logfile": "<root>/logs/supervisor/<file-name>.log",
+										"stderr_logfile": "<root>/logs/supervisor/<file-name>.log"
+									}
+								}
+							}
+						}
+					},
+					"key": "",
+					"package-manager": {
+						"data": {
+							"install-type": "soft",
+							"arguments": ["--no-progress"]
+						},
+						"name": "npm"
+					},
+					"pre-switch": {
+						"mkdir": {
+							"in-root": {
+								"logs": "<root>/logs",
+								"symfony-logs": "<root>/logs/symfony",
+								"cron-logs": "<root>/logs/cronlogs",
+								"supervisor-logs": "<root>/logs/supervisor"
+							}
+						},
+						"unlink": {
+							"logs": {
+								"symfony-logs": "<release-next>/app/logs"
+							}
+						},
+						"link": {
+							"logs": {
+								"<root>/logs/symfony": "<release-next>/app/logs"
+							},
+							"supervisor": {
+								"<root>/supervisor-generated": "/etc/supervisor/conf.d/<feat-name>.son-interface"
+							}
+						},
+						"console": {
+							"backup-idea": "echo 'Skipping .idea backup.'",
+							"add-rights": "chmod 775 <release-next>"
+						}
+					},
+					"post-switch": {
+						"console": {
+							"reload-workers": "sudo supervisorctl reread && sudo supervisorctl update",
+							"move-into-release": "echo 'Skipping move into release.'",
+							"restore-idea": "echo 'Skipping restore .idea.'",
+							"reload-nginx": "sudo /bin/systemctl restart nginx.service"
+						}
+					}
+				}
+			}
+		}
+	},
+	"programming-language": "node"
+}

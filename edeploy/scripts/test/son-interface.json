@@ -1,0 +1,15 @@
+{
+	"include": {
+		"xref": {
+			"common": {
+				"type": "url",
+				"src": "[[repo:son-interface:fetch-url]]/[[repo:son-interface:version]]/edeploy/scripts/dev/son-interface.json"
+			}
+		},
+		"main": ["common"]
+	},
+	"remove": {
+	},
+	"add": {
+	}
+}

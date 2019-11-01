@@ -1,0 +1,28 @@
+{
+	"include": {
+		"xref": {
+			"common": {
+				"type": "url",
+				"src": "[[repo:son:fetch-url]]/[[repo:son:version]]/edeploy/choices/dev/son.json"
+			}
+		},
+		"main": ["common"]
+	},
+	"remove": {
+		
+	},
+	"add": {
+		"root-path": {
+			"default": "/var/www/"
+		},
+		"deploy-folder": {
+			"default": ""
+		},
+		"son:http": {
+			"default": "http://son.emag.network"
+		},
+		"son:host": {
+			"default": "son.emag.network"
+		}
+	}
+}

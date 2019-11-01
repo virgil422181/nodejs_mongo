@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# __VERSION__ 2.0.1
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+function ShowHelp {
+	echo
+	echo 'Invalid arguments.'
+	echo
+	echo './edeploy.sh <action> <cache-server> <sync-threading> (env-answers)'
+	echo
+	echo 'example:'
+	echo './edeploy.sh d cache.emag.network serial dev'
+	echo
+	echo 'action'
+	echo ' setup    Deploy onto a new machine (fresh install, with downtime).'
+	echo ' release  Deploy onto a machine in use (update, without downtime).'
+	echo ' rollback Rollback the first selected machine (without downtime).'
+	echo ' sync     Syncrhonize all machines with the first (without downtime).'
+	echo
+	echo 'cache-server'
+	echo '          Full host name or "none" not to use cache.'
+	echo '          You must have write permissions in /tmp/cache onto this machine.'
+	echo
+	echo 'sync-threading'
+	echo ' parallel Synchronize all machines with the first at the same time.'
+	echo ' serial   Synchronize all machines with the first one after another.'
+	echo 
+	echo 'env-answers'
+	echo '          answers/<env-answers>.json file will be used to answer questions.'
+}
+
+if [ "$#" -lt 3 ]; then
+	ShowHelp
+	exit 1
+fi;
+
+if [ "$1" == "sync" ]; then
+	msg="syncrhonize selected machines with the first one"
+	action="s"
+elif [ "$1" == "release" ]; then
+	msg="release onto the first selected machine"
+	action="u"
+elif [ "$1" == "rollback" ]; then
+	msg="restore the previous release on the first selected machine"
+	action="r"
+elif [ "$1" == "setup" ]; then
+	msg="do a fresh deploy onto the first selected machine"
+	action="d"
+else
+	ShowHelp
+	exit 1
+fi;
+
+cpargs=""
+if [ "$#" -eq 4 ]; then
+        ansfile="answers/$4.json"
+        if [ ! -f "$ansfile" ]; then
+                printf "${RED}ERROR: There are no answers for environment \"$#\". File not found: $ansfile${NC}\n"
+                exit 3
+        fi;
+        cpargs=" --answers=answers/$4.json"
+fi;
+
+cfgsrc="cli.php"
+cfgfile="release.json"
+
+printf "\n${GREEN}Installing required tools...${NC}\n\n"
+
+# git pull
+git pull 2>&1 >/dev/null
+if [ $? -ne 0 ]; then
+	printf "${YELLOW}WARNING: Unable to pull remote changes to this repository.${NC}\n"
+fi;
+
+# download tools installer script
+url="http://core.emag.local/resources/edeploy/setup.v2"
+setup=$(curl -sf "${url}" 2>/dev/null)
+if [ $? -ne 0 ]; then
+	printf "${RED}ERROR: Unable to download installer script from \"${url}\".${NC}\n"
+	exit $?
+fi;
+
+# install tools
+bash <(echo "#$setup")
+
+cpl=1
+if [ "$action" == "s" ]; then
+	if [ -f "$cfgfile" ]; then
+		printf "\n${YELLOW}Using the previously compiled eDeploy configuration ($cfgfile)...${NC}\n\n"
+		cpl=0
+	fi;
+fi;
+
+if [ "$cpl" -eq 1 ]; then
+	printf "\n${GREEN}Compiling eDeploy configuration...${NC}\n\n"
+	./bin/jsonc/jsonc.phar compile file:$cfgsrc $cfgfile $cpargs
+	if [ $? -ne 0 ]; then
+		printf "${RED}ERROR: Compiler script failed.${NC}\n"
+		exit 4
+	fi;
+fi;
+
+if [ "$2" == "none" ]; then
+	cachesrv=""
+else
+	cachesrv=" --cache-server=$2:/tmp/cache"
+fi;
+
+printf "${GREEN}Running eDeploy to ${msg}...${NC}\n"
+cmd="python bin/edeploy_tool/edeploy.py -$action$cachesrv --deploy-config=$cfgfile --all --feat-name="" --no-pid --computing=$3 --password=\"\""
+echo
+printf "${YELLOW}$cmd${NC}\n\n"
+$cmd
+
+if [ "$action" == "s" ] || [ "$action" == "r" ]; then
+	printf "${YELLOW}Removing eDeploy configuration file.${NC}\n"
+	rm -f $cfgfile
+fi;

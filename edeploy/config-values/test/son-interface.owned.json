@@ -1,0 +1,9 @@
+{
+  "common_data": {
+    "son-interface.env": "dev",
+    "son-interface.port": 3000,
+    "son-interface.mongodb_server": "mongodb://localhost:27017",
+    "son-interface.mongodb_database": "supplier-order-node",
+    "son-interface.mongodb_error_database": "errors"
+  }
+}
